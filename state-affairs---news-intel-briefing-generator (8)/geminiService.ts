@@ -131,6 +131,11 @@ export async function generateBriefingContent(
       - 'status': A short 2-3 word strategic status label (e.g., "ACTIVE LEGISLATION", "REGULATORY REVIEW", "MONITORING"). Do NOT put long headlines or sentences here.
       - 'impact': The core analysis of what is happening in that state and what it means for the future. Use citations [n].
 
+      WATCH LIST RULES:
+      - The watchList should contain a MIX of: emerging policy topics, specific bill numbers, key stakeholders/companies, regulatory bodies, and states with high activity.
+      - Example items: "HB 1234 - School Choice Expansion", "DEI Legislation Wave", "Teacher Shortage Crisis", "Gov. Shapiro", "Texas STAAR Testing Reform"
+      - Do NOT make it just a list of state names. Include diverse strategic intelligence targets.
+
       SOURCE SELECTION RULES:
       - Include ALL articles that have material impact on Corporate Government Relations teams or Lobbyists
       - Prioritize: regulatory changes, compliance deadlines, legislative votes, enforcement actions, budget implications
