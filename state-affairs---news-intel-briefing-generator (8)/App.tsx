@@ -685,8 +685,14 @@ const App = () => {
   const [showLibraryDrawer, setShowLibraryDrawer] = useState(false);
   const [showHistoryDrawer, setShowHistoryDrawer] = useState(false);
   const [showSettingsPanel, setShowSettingsPanel] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
-  
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [showLinkDropdown, setShowLinkDropdown] = useState(false);
+  const [isLoadingSharedBriefing, setIsLoadingSharedBriefing] = useState(false);
+  const [showGatedForm, setShowGatedForm] = useState(false);
+  const [gatedBriefingId, setGatedBriefingId] = useState<string | null>(null);
+  const [gatedFormData, setGatedFormData] = useState({ firstName: '', lastName: '', email: '' });
+  const [gatedFormError, setGatedFormError] = useState<string | null>(null);
+
   const [isTuning, setIsTuning] = useState<string | null>(null);
   const [tuningPrompt, setTuningPrompt] = useState("");
   const [isProcessingTune, setIsProcessingTune] = useState(false);
@@ -715,35 +721,83 @@ const App = () => {
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
 
   // Fetch briefing from Google Sheets (for shared links)
-  const fetchBriefingFromSheets = async (id: string) => {
+  const fetchBriefingFromSheets = async (id: string, isGated: boolean = false) => {
+    setIsLoadingSharedBriefing(true);
     try {
       const response = await fetch(`${BRIEFINGS_SCRIPT_URL}?briefingId=${id}`);
       const result = await response.json();
       if (result.success && result.briefing) {
-        setCurrentBriefing(result.briefing);
-        setPhase('public-view');
+        if (isGated) {
+          // Show form first, store briefing ID for after form submission
+          setGatedBriefingId(id);
+          setShowGatedForm(true);
+          setCurrentBriefing(result.briefing); // Pre-load but don't show yet
+        } else {
+          setCurrentBriefing(result.briefing);
+          setPhase('public-view');
+        }
       } else {
         alert('Briefing not found or expired');
       }
     } catch (err) {
       console.error(err);
       alert('Failed to load briefing');
+    } finally {
+      setIsLoadingSharedBriefing(false);
+    }
+  };
+
+  // Submit gated form and reveal briefing
+  const submitGatedForm = async () => {
+    const { firstName, lastName, email } = gatedFormData;
+    if (!firstName.trim() || !lastName.trim() || !email.trim()) {
+      setGatedFormError('All fields are required');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setGatedFormError('Please enter a valid email address');
+      return;
+    }
+    setGatedFormError(null);
+
+    try {
+      // Save form submission to Google Sheets
+      await fetch(BRIEFINGS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          formSubmission: {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            briefingId: gatedBriefingId,
+            timestamp: new Date().toISOString()
+          }
+        }),
+      });
+      // Show the briefing
+      setShowGatedForm(false);
+      setPhase('public-view');
+    } catch (err) {
+      console.error(err);
+      setGatedFormError('Failed to submit. Please try again.');
     }
   };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const viewId = params.get('view');
+    const isGated = params.get('gated') === 'true';
+
     if (viewId) {
-      // First check localStorage (for internal users)
+      // First check localStorage (for internal users) - skip gated form for internal
       const brief = savedBriefings.find(b => b.id === viewId);
-      if (brief) {
+      if (brief && !isGated) {
         setCurrentBriefing(brief);
         setPhase('public-view');
       } else {
-        // Not in localStorage - fetch from Google Sheets (external viewer)
+        // Not in localStorage or gated - fetch from Google Sheets (external viewer)
         setIsExternalViewer(true);
-        fetchBriefingFromSheets(viewId);
+        fetchBriefingFromSheets(viewId, isGated);
       }
     }
   }, []); // Empty dependency - only run once on mount (fixes URL bug)
@@ -947,6 +1001,78 @@ const App = () => {
   const pivotData = computePivotData();
   const availableTopics = getAvailableTopics();
 
+  // Loading screen for shared briefings
+  if (isLoadingSharedBriefing) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-sm font-black uppercase tracking-widest text-slate-400">Loading Intelligence Briefing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Gated form for lead capture
+  if (showGatedForm) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-black uppercase tracking-tight text-slate-900 mb-2">Intelligence Briefing</h1>
+            <p className="text-sm text-slate-500">Enter your details to access this briefing</p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">First Name</label>
+              <input
+                type="text"
+                value={gatedFormData.firstName}
+                onChange={(e) => setGatedFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Last Name</label>
+              <input
+                type="text"
+                value={gatedFormData.lastName}
+                onChange={(e) => setGatedFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
+                placeholder="Smith"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Email</label>
+              <input
+                type="email"
+                value={gatedFormData.email}
+                onChange={(e) => setGatedFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm font-bold focus:border-indigo-600 outline-none transition-all"
+                placeholder="john@company.com"
+              />
+            </div>
+
+            {gatedFormError && (
+              <p className="text-red-500 text-xs font-bold text-center">{gatedFormError}</p>
+            )}
+
+            <button
+              onClick={submitGatedForm}
+              className="w-full py-4 bg-indigo-600 text-white font-black uppercase tracking-widest rounded-xl hover:bg-indigo-700 transition-all text-sm mt-4"
+            >
+              View Briefing
+            </button>
+          </div>
+
+          <p className="text-[10px] text-slate-400 text-center mt-6">Your information will be shared with the briefing author</p>
+        </div>
+      </div>
+    );
+  }
+
   if (phase === 'public-view' && currentBriefing) {
     const currentViewContent = getCurrentContent();
     return (
@@ -1092,33 +1218,73 @@ const App = () => {
                    >
                      <EditIcon className="w-4 h-4" /> {phase === 'editing' ? (hasUnsavedEdits ? 'Save Changes' : 'Exit Edit Mode') : 'Edit Intelligence'}
                    </button>
-                   <button
-                    onClick={async () => {
-                      try {
-                        // Save briefing to Google Sheets first
-                        const response = await fetch(BRIEFINGS_SCRIPT_URL, {
-                          method: 'POST',
-                          body: JSON.stringify({ briefing: currentBriefing }),
-                        });
-                        const result = await response.json();
-
-                        if (result.success && result.id) {
-                          const url = `${window.location.origin}${window.location.pathname}?view=${result.id}`;
-                          await navigator.clipboard.writeText(url);
-                          setCopySuccess(true);
-                          setTimeout(() => setCopySuccess(false), 2000);
-                        } else {
-                          alert('Failed to generate shareable link');
-                        }
-                      } catch (err) {
-                        console.error(err);
-                        alert('Failed to generate shareable link');
-                      }
-                    }}
-                    className="px-6 py-4 bg-white border border-slate-200 text-slate-900 text-[11px] font-black uppercase rounded-2xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-                   >
-                     <LinkIcon className="w-4 h-4" /> {copySuccess ? 'Copied!' : 'Copy Link'}
-                   </button>
+                   <div className="relative">
+                     <button
+                      onClick={() => setShowLinkDropdown(!showLinkDropdown)}
+                      className="px-6 py-4 bg-white border border-slate-200 text-slate-900 text-[11px] font-black uppercase rounded-2xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
+                     >
+                       <LinkIcon className="w-4 h-4" /> {copySuccess ? `${copySuccess}!` : 'Copy Link'}
+                       <svg className={`w-3 h-3 transition-transform ${showLinkDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
+                     </button>
+                     {showLinkDropdown && (
+                       <div className="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[200px]">
+                         <button
+                           onClick={async () => {
+                             try {
+                               const response = await fetch(BRIEFINGS_SCRIPT_URL, {
+                                 method: 'POST',
+                                 body: JSON.stringify({ briefing: currentBriefing }),
+                               });
+                               const result = await response.json();
+                               if (result.success && result.id) {
+                                 const url = `${window.location.origin}${window.location.pathname}?view=${result.id}`;
+                                 await navigator.clipboard.writeText(url);
+                                 setCopySuccess('Public Copied');
+                                 setTimeout(() => setCopySuccess(null), 2000);
+                                 setShowLinkDropdown(false);
+                               } else {
+                                 alert('Failed to generate link');
+                               }
+                             } catch (err) {
+                               console.error(err);
+                               alert('Failed to generate link');
+                             }
+                           }}
+                           className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all border-b border-slate-100"
+                         >
+                           🔓 Public Link
+                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">Anyone can view directly</span>
+                         </button>
+                         <button
+                           onClick={async () => {
+                             try {
+                               const response = await fetch(BRIEFINGS_SCRIPT_URL, {
+                                 method: 'POST',
+                                 body: JSON.stringify({ briefing: currentBriefing }),
+                               });
+                               const result = await response.json();
+                               if (result.success && result.id) {
+                                 const url = `${window.location.origin}${window.location.pathname}?view=${result.id}&gated=true`;
+                                 await navigator.clipboard.writeText(url);
+                                 setCopySuccess('Gated Copied');
+                                 setTimeout(() => setCopySuccess(null), 2000);
+                                 setShowLinkDropdown(false);
+                               } else {
+                                 alert('Failed to generate link');
+                               }
+                             } catch (err) {
+                               console.error(err);
+                               alert('Failed to generate link');
+                             }
+                           }}
+                           className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all"
+                         >
+                           🔒 Gated Link
+                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">Requires name & email first</span>
+                         </button>
+                       </div>
+                     )}
+                   </div>
                    <button 
                     onClick={() => window.print()} 
                     className="px-6 py-4 bg-indigo-600 text-white text-[11px] font-black uppercase rounded-2xl tracking-widest hover:scale-105 transition-transform shadow-xl shadow-indigo-100"
