@@ -5,7 +5,7 @@ import { generateBriefingContent, tuneBriefingSection, BRIEFING_SCHEMA } from '.
 type Phase = 'input' | 'analysis' | 'generating' | 'preview' | 'editing' | 'public-view';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD8ZzB7nWNcxu8zMhFmyRsFhmcxYhirD08nvM9HUEO8JNhGq3fkAqYitgghY-xSs_x/exec';
-const BRIEFINGS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx2vFxWQeosWltMRHrndBSqW7BKVKfrcwNzRQvCyMO4HO_hNjiBLlF19XakF_pRMtAZ/exec';
+const BRIEFINGS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaWzFfEpvgpjwJJtj0_rUYQJyWAAimnUay6cBKQQJXsWx8YzvoOLPjrraKJIsR44-k/exec';
 
 const industryKeywords = ['Energy', 'Healthcare', 'Finance', 'Education', 'Environment', 'Transportation', 'Tech', 'Labor', 'Housing', 'Cannabis', 'Agriculture', 'Retail', 'Manufacturing'];
 
@@ -1198,7 +1198,7 @@ const App = () => {
         {(phase === 'preview' || phase === 'editing') && currentBriefing && (
           <div className="w-full max-w-5xl animate-in fade-in duration-500 mt-4 pb-32">
             <div className="sticky top-20 z-50 mb-8 no-print">
-              <div className="flex flex-wrap gap-4 justify-between items-center bg-white/95 backdrop-blur-md border border-slate-200 p-6 rounded-[32px] shadow-2xl overflow-hidden transition-all hover:shadow-indigo-100/20">
+              <div className="flex flex-wrap gap-4 justify-between items-center bg-white/95 backdrop-blur-md border border-slate-200 p-6 rounded-[32px] shadow-2xl transition-all hover:shadow-indigo-100/20">
                  <div className="flex items-center gap-5 px-2">
                    <div className="w-2 h-10 bg-indigo-600 rounded-full"></div>
                    <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">V{currentBriefing.currentVersion} DRAFT</h2>
