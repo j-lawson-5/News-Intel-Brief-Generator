@@ -133,8 +133,10 @@ export async function generateBriefingContent(
 
       WATCH LIST RULES:
       - The watchList should contain a MIX of: emerging policy topics, specific bill numbers, key stakeholders/companies, regulatory bodies, and states with high activity.
-      - Example items: "HB 1234 - School Choice Expansion", "DEI Legislation Wave", "Teacher Shortage Crisis", "Gov. Shapiro", "Texas STAAR Testing Reform"
-      - Do NOT make it just a list of state names. Include diverse strategic intelligence targets.
+      - Each item MUST include brief context (5-10 words) explaining WHY it's on the watch list.
+      - Format: "[Entity/Topic] - [Why it matters]"
+      - Example items: "Gov. Shapiro - Pushing voucher expansion", "HB 1234 - Could set national precedent", "TX Testing Reform - Compliance deadline Q2", "NEA - Mobilizing against budget cuts"
+      - Do NOT use bare names without context.
 
       SOURCE SELECTION RULES:
       - Include ALL articles that have material impact on Corporate Government Relations teams or Lobbyists
