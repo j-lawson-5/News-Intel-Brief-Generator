@@ -5,7 +5,7 @@ import { generateBriefingContent, tuneBriefingSection, BRIEFING_SCHEMA } from '.
 type Phase = 'input' | 'analysis' | 'generating' | 'preview' | 'editing' | 'public-view';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD8ZzB7nWNcxu8zMhFmyRsFhmcxYhirD08nvM9HUEO8JNhGq3fkAqYitgghY-xSs_x/exec';
-const BRIEFINGS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxaWzFfEpvgpjwJJtj0_rUYQJyWAAimnUay6cBKQQJXsWx8YzvoOLPjrraKJIsR44-k/exec';
+const BRIEFINGS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzbkn1pF6gjA13Qy7aKsQc1UWO5GLuF_tGW_7lkyNwrXtFk3rW75h584nxGYpiJoVf1/exec';
 
 const industryKeywords = ['Energy', 'Healthcare', 'Finance', 'Education', 'Environment', 'Transportation', 'Tech', 'Labor', 'Housing', 'Cannabis', 'Agriculture', 'Retail', 'Manufacturing'];
 
