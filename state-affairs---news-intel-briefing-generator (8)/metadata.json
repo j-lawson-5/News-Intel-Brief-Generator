@@ -1,0 +1,5 @@
+{
+  "name": "State Affairs - News Intel Briefing Generator",
+  "description": "An internal tool for generating professional industry intelligence briefings using AI-driven analysis of legislative and regulatory data.",
+  "requestFramePermissions": []
+}
