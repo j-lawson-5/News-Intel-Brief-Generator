@@ -689,6 +689,7 @@ const App = () => {
   const [isTuning, setIsTuning] = useState<string | null>(null);
   const [tuningPrompt, setTuningPrompt] = useState("");
   const [isProcessingTune, setIsProcessingTune] = useState(false);
+  const [isExternalViewer, setIsExternalViewer] = useState(false);
 
   // Mapping for targeted section tuning schemas
   const SECTION_SCHEMAS: Record<string, any> = useMemo(() => ({
@@ -717,7 +718,15 @@ const App = () => {
     const viewId = params.get('view');
     if (viewId) {
       const brief = savedBriefings.find(b => b.id === viewId);
-      if (brief) { setCurrentBriefing(brief); setPhase('public-view'); }
+      if (brief) {
+        setCurrentBriefing(brief);
+        setPhase('public-view');
+      } else {
+        // User arrived via shared link but doesn't have the briefing in localStorage
+        // This means they're an external viewer (prospect)
+        setIsExternalViewer(true);
+        setPhase('public-view');
+      }
     }
   }, [savedBriefings]);
 
@@ -924,10 +933,12 @@ const App = () => {
     const currentViewContent = getCurrentContent();
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <div className="bg-slate-900 text-white px-8 py-3 flex justify-between items-center no-print">
-          <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Live Public View Preview</span>
-          <button onClick={() => setPhase('preview')} className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-all">Back to Platform</button>
-        </div>
+        {!isExternalViewer && (
+          <div className="bg-slate-900 text-white px-8 py-3 flex justify-between items-center no-print">
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Live Public View Preview</span>
+            <button onClick={() => setPhase('preview')} className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-all">Back to Platform</button>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto py-12 px-6 bg-slate-50 flex flex-col items-center">
           <div className="max-w-4xl w-full border border-slate-100 shadow-2xl rounded-[48px] p-12 md:p-20 bg-white mt-12 mb-24 overflow-hidden">
             {currentViewContent && <BriefingContentPreview content={currentViewContent} industry={currentBriefing.topic} dateRange={currentBriefing.dateRange} />}
