@@ -491,7 +491,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {content.regional.map((r, i) => (
               <div key={i} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-3 relative group overflow-hidden">
-                <div className="flex justify-between items-center gap-4">
+                <div className="flex flex-wrap justify-between items-start gap-2">
                   <EditableText value={r.state} onSave={v => {
                     const newList = [...content.regional];
                     newList[i].state = v;
@@ -501,7 +501,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                     const newList = [...content.regional];
                     newList[i].status = v;
                     updateField('regional', newList);
-                  }} isEditable={isEditable} sources={content.sources} className="text-[9px] font-black uppercase text-slate-400 text-right whitespace-nowrap" />
+                  }} isEditable={isEditable} sources={content.sources} className="text-[9px] font-black uppercase text-slate-400 text-right" />
                 </div>
                 <EditableText value={r.impact} onSave={v => {
                   const newList = [...content.regional];
