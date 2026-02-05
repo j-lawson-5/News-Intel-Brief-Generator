@@ -147,6 +147,42 @@ export async function generateBriefingContent(
       - If not, rewrite.
     `;
 
+    const forcingFunctionInstructions = `
+      FORCING FUNCTION RULES:
+      The Forcing Function identifies the SINGLE most critical catalyst driving policy change right now.
+
+      - 'what': Identify the ONE dominant catalyst creating policy urgency (e.g., federal deadline, budget crisis, election outcome, court ruling, public incident, infrastructure failure)
+      - 'forecast': 3-4 bullets predicting how this catalyst will ripple through the policy landscape in the next 6-12 months
+      - 'why': Explain why this forcing function matters MORE than other factors right now - what makes it the primary driver
+
+      CRITICAL: Pick ONE forcing function, not multiple. This is the single most powerful driver reshaping the policy environment.
+      If no clear forcing function exists in the data, omit this section entirely.
+    `;
+
+    const signalsInstructions = `
+      STRATEGIC SIGNALS RULES:
+      Signals are slow-moving structural forces that shape policy behavior across states. This section explains WHY the landscape is changing.
+
+      Generate 3-5 signal clusters. Each signal must have:
+      - 'title': Short category label (2-4 words) naming the force (e.g., "Infrastructure Strain", "Budget Pressure", "Regulatory Acceleration")
+      - 'activity': One sentence describing the underlying shift or tension
+      - 'developments': 2-3 bullets describing patterns, each following: [Policy Pressure / Political Momentum / Economic Force] → [Why It's Growing]
+
+      WHAT COUNTS AS A SIGNAL:
+      - Infrastructure strain, budget shortfalls, industry expansion, political pressure, legal precedents, technology adoption curves, public sentiment shifts
+      - If a development would still matter even if a specific bill died, it's a signal
+
+      WRITING STYLE:
+      Write like a geopolitical or macroeconomic analyst. Focus on systems, incentives, and constraints.
+      Use phrases like "growing pressure," "increasing scrutiny," "accelerating competition," "emerging tension"
+
+      AVOID:
+      - Mentioning specific companies unless they symbolize a broader trend
+      - Recommending actions (that's for Strategic Actions)
+      - Summarizing individual articles
+      - Single-state signals unless nationally significant
+    `;
+
     const prompt = `
       ${systemPrompt || ''}
 
@@ -156,6 +192,10 @@ export async function generateBriefingContent(
       Focus Context: ${context || 'General industry monitoring.'}
 
       ${blufInstructions}
+
+      ${forcingFunctionInstructions}
+
+      ${signalsInstructions}
 
       ${insightContext}
 
