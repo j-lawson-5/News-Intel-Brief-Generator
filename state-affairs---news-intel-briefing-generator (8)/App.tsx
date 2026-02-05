@@ -140,20 +140,32 @@ const renderTextWithFootnotes = (text: string, sources: { title: string; url: st
   if (!text) return null;
 
   const parseFootnotes = (rawText: string, keyPrefix: string) => {
-    const parts = rawText.split(/(\[\d+\])/);
+    // Match both single [1] and comma-separated [1, 2, 3] citations
+    const parts = rawText.split(/(\[\d+(?:,\s*\d+)*\])/);
     return parts.map((part, i) => {
-      const match = part.match(/\[(\d+)\]/);
+      const match = part.match(/^\[(\d+(?:,\s*\d+)*)\]$/);
       if (match) {
-        const num = parseInt(match[1], 10);
-        const source = sources?.[num - 1]; // 1-indexed to 0-indexed lookup
-        if (source?.url) {
-          return (
-            <sup key={`${keyPrefix}-${i}`} className="text-[10px] font-black text-indigo-600 px-0.5 select-none">
-              <a href={source.url} target="_blank" rel="noopener noreferrer" className="hover:underline">[{num}]</a>
-            </sup>
-          );
-        }
-        return <sup key={`${keyPrefix}-${i}`} className="text-[10px] font-black text-indigo-600 px-0.5 select-none">[{num}]</sup>;
+        // Split the numbers (handles "1" or "1, 2, 3")
+        const nums = match[1].split(/,\s*/).map(n => parseInt(n.trim(), 10));
+        return (
+          <sup key={`${keyPrefix}-${i}`} className="text-[10px] font-black text-indigo-600 px-0.5 select-none">
+            [
+            {nums.map((num, j) => {
+              const source = sources?.[num - 1];
+              return (
+                <span key={`${keyPrefix}-${i}-${j}`}>
+                  {j > 0 && ', '}
+                  {source?.url ? (
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="hover:underline">{num}</a>
+                  ) : (
+                    <span>{num}</span>
+                  )}
+                </span>
+              );
+            })}
+            ]
+          </sup>
+        );
       }
       return part;
     });
