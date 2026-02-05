@@ -1105,27 +1105,150 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col antialiased text-slate-900 overflow-x-hidden">
-      <header className="border-b border-slate-100 bg-white/90 backdrop-blur-md sticky top-0 z-[100] px-8 py-5 flex items-center justify-between no-print shadow-sm">
-        <div className="flex items-center gap-8">
+      <header className="border-b border-slate-100 bg-white/90 backdrop-blur-md sticky top-0 z-[100] px-8 py-4 flex items-center justify-between no-print shadow-sm">
+        <div className="flex items-center gap-6">
           <div onClick={() => setPhase('input')} className="cursor-pointer group flex flex-col">
             <h1 className="text-xl font-black tracking-tighter text-slate-900 group-hover:text-indigo-600 transition-colors uppercase leading-none">State Affairs</h1>
             <span className="text-[9px] font-black uppercase text-indigo-600 tracking-widest mt-1">Architect Hub</span>
           </div>
+          {(phase === 'preview' || phase === 'editing') && currentBriefing && (
+            <>
+              <div className="w-px h-8 bg-slate-200" />
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-6 bg-indigo-600 rounded-full" />
+                <span className="text-lg font-black text-slate-900 uppercase tracking-tight">V{currentBriefing.currentVersion} Draft</span>
+              </div>
+            </>
+          )}
         </div>
-        <div className="flex items-center gap-6">
-          <button onClick={() => setShowLibraryDrawer(true)} title="Vault / Library" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-            <LibraryIcon className="w-6 h-6" />
-          </button>
-          <button onClick={() => setShowSettingsPanel(true)} title="Data Console" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-            <SettingsIcon className="w-5 h-5" />
-          </button>
-          {currentBriefing && (
+
+        {(phase === 'preview' || phase === 'editing') && currentBriefing ? (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                if (phase === 'editing') {
+                  commitManualChanges();
+                } else {
+                  setDraftContent(getCurrentContent());
+                  setPhase('editing');
+                  setHasUnsavedEdits(false);
+                }
+              }}
+              className={`px-4 py-2 border text-[10px] font-black uppercase rounded-xl tracking-widest transition-all flex items-center gap-2 ${phase === 'editing' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'}`}
+            >
+              <EditIcon className="w-3.5 h-3.5" /> {phase === 'editing' ? (hasUnsavedEdits ? 'Save' : 'Exit Edit') : 'Edit'}
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowLinkDropdown(!showLinkDropdown)}
+                className="px-4 py-2 bg-white border border-slate-200 text-slate-900 text-[10px] font-black uppercase rounded-xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2"
+              >
+                <LinkIcon className="w-3.5 h-3.5" /> {copySuccess ? `${copySuccess}!` : 'Share'}
+                <svg className={`w-2.5 h-2.5 transition-transform ${showLinkDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
+              </button>
+              {showLinkDropdown && (
+                <div className="absolute top-full right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[180px]">
+                  <button
+                    disabled={!!isGeneratingLink}
+                    onClick={async () => {
+                      setIsGeneratingLink('public');
+                      try {
+                        const response = await fetch(BRIEFINGS_SCRIPT_URL, {
+                          method: 'POST',
+                          body: JSON.stringify({ briefing: currentBriefing }),
+                        });
+                        const result = await response.json();
+                        if (result.success && result.id) {
+                          const url = `${window.location.origin}${window.location.pathname}?view=${result.id}`;
+                          await navigator.clipboard.writeText(url);
+                          setCopySuccess('Copied');
+                          setTimeout(() => setCopySuccess(null), 2000);
+                          setShowLinkDropdown(false);
+                        } else {
+                          alert('Failed to generate link');
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Failed to generate link');
+                      } finally {
+                        setIsGeneratingLink(null);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all border-b border-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingLink === 'public' ? '⏳ Generating...' : '🔓 Public Link'}
+                    <span className="block text-[8px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'public' ? 'Please wait' : 'Anyone can view'}</span>
+                  </button>
+                  <button
+                    disabled={!!isGeneratingLink}
+                    onClick={async () => {
+                      setIsGeneratingLink('gated');
+                      try {
+                        const response = await fetch(BRIEFINGS_SCRIPT_URL, {
+                          method: 'POST',
+                          body: JSON.stringify({ briefing: currentBriefing }),
+                        });
+                        const result = await response.json();
+                        if (result.success && result.id) {
+                          const url = `${window.location.origin}${window.location.pathname}?view=${result.id}&gated=true`;
+                          await navigator.clipboard.writeText(url);
+                          setCopySuccess('Copied');
+                          setTimeout(() => setCopySuccess(null), 2000);
+                          setShowLinkDropdown(false);
+                        } else {
+                          alert('Failed to generate link');
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Failed to generate link');
+                      } finally {
+                        setIsGeneratingLink(null);
+                      }
+                    }}
+                    className="w-full px-4 py-2.5 text-left text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingLink === 'gated' ? '⏳ Generating...' : '🔒 Gated Link'}
+                    <span className="block text-[8px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'gated' ? 'Please wait' : 'Requires email'}</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            <button onClick={() => window.print()} className="px-4 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase rounded-xl tracking-widest hover:bg-indigo-700 transition-all">
+              Export PDF
+            </button>
+            <button onClick={() => setPhase('public-view')} className="px-4 py-2 bg-white border border-slate-200 text-slate-900 text-[10px] font-black uppercase rounded-xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2">
+              <EyeIcon className="w-3.5 h-3.5" /> Preview
+            </button>
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+            <button onClick={() => setShowLibraryDrawer(true)} title="Vault / Library" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <LibraryIcon className="w-5 h-5" />
+            </button>
+            <button onClick={() => setShowSettingsPanel(true)} title="Data Console" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <SettingsIcon className="w-5 h-5" />
+            </button>
             <button onClick={() => setShowHistoryDrawer(!showHistoryDrawer)} title="Version History" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
               <HistoryIcon className="w-5 h-5" />
             </button>
-          )}
-          {phase !== 'input' && <button onClick={() => setPhase('input')} className="text-[10px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest border-l border-slate-100 pl-6">New Briefing</button>}
-        </div>
+            <button onClick={() => setPhase('input')} className="px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase rounded-xl tracking-widest hover:bg-slate-800 transition-all">
+              New
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-6">
+            <button onClick={() => setShowLibraryDrawer(true)} title="Vault / Library" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <LibraryIcon className="w-6 h-6" />
+            </button>
+            <button onClick={() => setShowSettingsPanel(true)} title="Data Console" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+              <SettingsIcon className="w-5 h-5" />
+            </button>
+            {currentBriefing && (
+              <button onClick={() => setShowHistoryDrawer(!showHistoryDrawer)} title="Version History" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+                <HistoryIcon className="w-5 h-5" />
+              </button>
+            )}
+            {phase !== 'input' && <button onClick={() => setPhase('input')} className="text-[10px] font-black text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest border-l border-slate-100 pl-6">New Briefing</button>}
+          </div>
+        )}
       </header>
 
       <main className="flex-1 flex flex-col items-center py-12 px-6 overflow-y-auto relative bg-slate-50/20">
@@ -1208,118 +1331,11 @@ const App = () => {
 
         {(phase === 'preview' || phase === 'editing') && currentBriefing && (
           <div className="w-full max-w-5xl animate-in fade-in duration-500 mt-4 pb-32">
-            <div className="sticky top-20 z-50 mb-8 no-print">
-              <div className="flex flex-wrap gap-4 justify-between items-center bg-white/95 backdrop-blur-md border border-slate-200 p-6 rounded-[32px] shadow-2xl transition-all hover:shadow-indigo-100/20">
-                 <div className="flex items-center gap-5 px-2">
-                   <div className="w-2 h-10 bg-indigo-600 rounded-full"></div>
-                   <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter">V{currentBriefing.currentVersion} DRAFT</h2>
-                 </div>
-                 <div className="flex gap-4">
-                   <button 
-                    onClick={() => {
-                      if (phase === 'editing') {
-                        commitManualChanges();
-                      } else {
-                        setDraftContent(getCurrentContent());
-                        setPhase('editing');
-                        setHasUnsavedEdits(false);
-                      }
-                    }} 
-                    className={`px-6 py-4 border text-[11px] font-black uppercase rounded-2xl tracking-widest transition-all flex items-center gap-2 shadow-sm ${phase === 'editing' ? 'bg-indigo-600 text-white border-indigo-600 shadow-indigo-200' : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'}`}
-                   >
-                     <EditIcon className="w-4 h-4" /> {phase === 'editing' ? (hasUnsavedEdits ? 'Save Changes' : 'Exit Edit Mode') : 'Edit Intelligence'}
-                   </button>
-                   <div className="relative">
-                     <button
-                      onClick={() => setShowLinkDropdown(!showLinkDropdown)}
-                      className="px-6 py-4 bg-white border border-slate-200 text-slate-900 text-[11px] font-black uppercase rounded-2xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
-                     >
-                       <LinkIcon className="w-4 h-4" /> {copySuccess ? `${copySuccess}!` : 'Copy Link'}
-                       <svg className={`w-3 h-3 transition-transform ${showLinkDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7"/></svg>
-                     </button>
-                     {showLinkDropdown && (
-                       <div className="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[200px]">
-                         <button
-                           disabled={!!isGeneratingLink}
-                           onClick={async () => {
-                             setIsGeneratingLink('public');
-                             try {
-                               const response = await fetch(BRIEFINGS_SCRIPT_URL, {
-                                 method: 'POST',
-                                 body: JSON.stringify({ briefing: currentBriefing }),
-                               });
-                               const result = await response.json();
-                               if (result.success && result.id) {
-                                 const url = `${window.location.origin}${window.location.pathname}?view=${result.id}`;
-                                 await navigator.clipboard.writeText(url);
-                                 setCopySuccess('Public Copied');
-                                 setTimeout(() => setCopySuccess(null), 2000);
-                                 setShowLinkDropdown(false);
-                               } else {
-                                 alert('Failed to generate link');
-                               }
-                             } catch (err) {
-                               console.error(err);
-                               alert('Failed to generate link');
-                             } finally {
-                               setIsGeneratingLink(null);
-                             }
-                           }}
-                           className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all border-b border-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                         >
-                           {isGeneratingLink === 'public' ? '⏳ Generating...' : '🔓 Public Link'}
-                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'public' ? 'Please wait' : 'Anyone can view directly'}</span>
-                         </button>
-                         <button
-                           disabled={!!isGeneratingLink}
-                           onClick={async () => {
-                             setIsGeneratingLink('gated');
-                             try {
-                               const response = await fetch(BRIEFINGS_SCRIPT_URL, {
-                                 method: 'POST',
-                                 body: JSON.stringify({ briefing: currentBriefing }),
-                               });
-                               const result = await response.json();
-                               if (result.success && result.id) {
-                                 const url = `${window.location.origin}${window.location.pathname}?view=${result.id}&gated=true`;
-                                 await navigator.clipboard.writeText(url);
-                                 setCopySuccess('Gated Copied');
-                                 setTimeout(() => setCopySuccess(null), 2000);
-                                 setShowLinkDropdown(false);
-                               } else {
-                                 alert('Failed to generate link');
-                               }
-                             } catch (err) {
-                               console.error(err);
-                               alert('Failed to generate link');
-                             } finally {
-                               setIsGeneratingLink(null);
-                             }
-                           }}
-                           className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                         >
-                           {isGeneratingLink === 'gated' ? '⏳ Generating...' : '🔒 Gated Link'}
-                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'gated' ? 'Please wait' : 'Requires name & email first'}</span>
-                         </button>
-                       </div>
-                     )}
-                   </div>
-                   <button 
-                    onClick={() => window.print()} 
-                    className="px-6 py-4 bg-indigo-600 text-white text-[11px] font-black uppercase rounded-2xl tracking-widest hover:scale-105 transition-transform shadow-xl shadow-indigo-100"
-                   >
-                    Export PDF
-                   </button>
-                   <button onClick={() => setPhase('public-view')} className="px-6 py-4 bg-white border border-slate-200 text-slate-900 text-[11px] font-black uppercase rounded-2xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"><EyeIcon className="w-4 h-4" /> Public Preview</button>
-                   <button onClick={() => setPhase('input')} className="px-6 py-4 bg-slate-950 text-white text-[11px] font-black uppercase rounded-2xl tracking-widest hover:scale-105 transition-transform shadow-lg">Back to Input</button>
-                 </div>
+            {phase === 'editing' && (
+              <div className="bg-indigo-600 text-white px-8 py-3 rounded-2xl text-center text-[11px] font-black uppercase tracking-[0.2em] shadow-lg animate-in fade-in slide-in-from-top-2 mb-8 no-print">
+                Intelligence Architect Mode: Manual Editing Active • Click 'AI Tune' for Refinement
               </div>
-              {phase === 'editing' && (
-                <div className="bg-indigo-600 text-white px-8 py-3 rounded-2xl text-center text-[11px] font-black uppercase tracking-[0.2em] shadow-lg animate-in fade-in slide-in-from-top-2 mt-2">
-                  Intelligence Architect Mode: Manual Editing Active • Click 'AI Tune' for Refinement
-                </div>
-              )}
-            </div>
+            )}
 
             <div className={`bg-white border rounded-[56px] shadow-3xl p-16 md:p-24 mx-auto max-w-[880px] transition-all ring-1 overflow-hidden ${phase === 'editing' ? 'ring-indigo-300 bg-slate-50/30' : 'ring-slate-100'}`}>
               <BriefingContentPreview 
