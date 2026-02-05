@@ -1100,6 +1100,18 @@ const App = () => {
     );
   }
 
+  // Footer component for briefings
+  const BriefingFooter = () => (
+    <footer className="text-center py-12 px-6 space-y-4 border-t border-slate-100 mt-12">
+      <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+        © 2026 State Affairs • Intelligence Platform
+      </p>
+      <p className="text-[10px] text-slate-300 max-w-2xl mx-auto leading-relaxed">
+        This briefing was generated using semantic AI analysis of proprietary news sources. While we strive for accuracy, AI-generated content may contain errors or omissions. Recipients are advised to independently verify all information before making decisions. This document is provided for informational purposes only and does not constitute legal, financial, or professional advice.
+      </p>
+    </footer>
+  );
+
   if (phase === 'public-view' && currentBriefing) {
     const currentViewContent = getCurrentContent();
     return (
@@ -1111,8 +1123,9 @@ const App = () => {
           </div>
         )}
         <div className="flex-1 overflow-y-auto py-12 px-6 bg-slate-50 flex flex-col items-center">
-          <div className="max-w-4xl w-full border border-slate-100 shadow-2xl rounded-[48px] p-12 md:p-20 bg-white mt-12 mb-24 overflow-hidden">
+          <div className="max-w-4xl w-full border border-slate-100 shadow-2xl rounded-[48px] p-12 md:p-20 bg-white mt-12 overflow-hidden">
             {currentViewContent && <BriefingContentPreview content={currentViewContent} industry={currentBriefing.topic} dateRange={currentBriefing.dateRange} />}
+            <BriefingFooter />
           </div>
         </div>
       </div>
@@ -1365,10 +1378,10 @@ const App = () => {
             )}
 
             <div className={`bg-white border rounded-[56px] shadow-3xl p-16 md:p-24 mx-auto max-w-[880px] transition-all ring-1 overflow-hidden ${phase === 'editing' ? 'ring-indigo-300 bg-slate-50/30' : 'ring-slate-100'}`}>
-              <BriefingContentPreview 
-                content={(phase === 'editing' ? draftContent : getCurrentContent())!} 
-                industry={currentBriefing.topic} 
-                dateRange={currentBriefing.dateRange} 
+              <BriefingContentPreview
+                content={(phase === 'editing' ? draftContent : getCurrentContent())!}
+                industry={currentBriefing.topic}
+                dateRange={currentBriefing.dateRange}
                 isEditable={phase === 'editing'}
                 onEditSection={(s) => setIsTuning(s)}
                 onUpdateContent={(newContent) => {
@@ -1376,6 +1389,7 @@ const App = () => {
                   setHasUnsavedEdits(true);
                 }}
               />
+              <BriefingFooter />
             </div>
           </div>
         )}
