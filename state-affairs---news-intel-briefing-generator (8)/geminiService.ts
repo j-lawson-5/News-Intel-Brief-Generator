@@ -148,15 +148,31 @@ export async function generateBriefingContent(
     `;
 
     const forcingFunctionInstructions = `
-      FORCING FUNCTION RULES:
-      The Forcing Function identifies the SINGLE most critical catalyst driving policy change right now.
+      MARKET CATALYST / FORCING FUNCTION RULES:
+      This is NOT signals, observations, or actions. This is STRUCTURAL GRAVITY.
+      These are large external forces that shape everything else - whether policymakers act intentionally or not.
 
-      - 'what': Identify the ONE dominant catalyst creating policy urgency (e.g., federal deadline, budget crisis, election outcome, court ruling, public incident, infrastructure failure)
-      - 'forecast': 3-4 bullets predicting how this catalyst will ripple through the policy landscape in the next 6-12 months
-      - 'why': Explain why this forcing function matters MORE than other factors right now - what makes it the primary driver
+      Think: Technology shifts, Resource constraints, Demographic changes, Infrastructure limits, Capital flows, Geopolitical competition.
+      These forces would exist even if no legislation had yet been introduced.
 
-      CRITICAL: Pick ONE forcing function, not multiple. This is the single most powerful driver reshaping the policy environment.
-      If no clear forcing function exists in the data, omit this section entirely.
+      MENTAL MODEL: "If policymakers did nothing, what external force would still push this issue onto their agenda?" That's your catalyst.
+
+      - 'what' (MARKET CATALYST): One bold headline sentence describing the core structural shift.
+        Format: "What is growing/accelerating/expanding → in what domain"
+        Example tone: "Rapid expansion of X is increasing pressure on Y systems."
+
+      - 'forecast' (FORECAST SPECTRUM): Exactly 3 short bullets describing likely second-order effects.
+        Each follows: [Structural Force] → [System Response or Constraint]
+        These are inevitable reactions from markets, infrastructure, or governments.
+        Think: Cost pressure, Resource bottlenecks, Public scrutiny, Regulatory catch-up, Political attention.
+        NOT predictions about bills. Keep them short and directional.
+
+      - 'why' (INTELLIGENCE SYNTHESIS): 1-2 sentences explaining why this structural force pulls the company into policy and regulatory conversations.
+        Explain: Why the company becomes visible, Why scrutiny or influence grows, Why it becomes part of the debate.
+        Not tactical. Not advice. Just strategic positioning.
+
+      DO NOT: Mention specific bills, Recommend actions, List policies, Rehash trends from other sections.
+      If no clear structural catalyst exists in the data, omit this section entirely.
     `;
 
     const signalsInstructions = `
