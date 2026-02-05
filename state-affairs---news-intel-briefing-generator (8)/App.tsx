@@ -5,6 +5,7 @@ import { generateBriefingContent, tuneBriefingSection, BRIEFING_SCHEMA } from '.
 type Phase = 'input' | 'analysis' | 'generating' | 'preview' | 'editing' | 'public-view';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD8ZzB7nWNcxu8zMhFmyRsFhmcxYhirD08nvM9HUEO8JNhGq3fkAqYitgghY-xSs_x/exec';
+const BRIEFINGS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzX6sEicFBjieXs-SG_sPUuSozuIABUJOHJtMVeRQirM_zyWfc8Vxi-aynnq6H3eT7T/exec';
 
 const industryKeywords = ['Energy', 'Healthcare', 'Finance', 'Education', 'Environment', 'Transportation', 'Tech', 'Labor', 'Housing', 'Cannabis', 'Agriculture', 'Retail', 'Manufacturing'];
 
@@ -713,22 +714,39 @@ const App = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
 
+  // Fetch briefing from Google Sheets (for shared links)
+  const fetchBriefingFromSheets = async (id: string) => {
+    try {
+      const response = await fetch(`${BRIEFINGS_SCRIPT_URL}?briefingId=${id}`);
+      const result = await response.json();
+      if (result.success && result.briefing) {
+        setCurrentBriefing(result.briefing);
+        setPhase('public-view');
+      } else {
+        alert('Briefing not found or expired');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load briefing');
+    }
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const viewId = params.get('view');
     if (viewId) {
+      // First check localStorage (for internal users)
       const brief = savedBriefings.find(b => b.id === viewId);
       if (brief) {
         setCurrentBriefing(brief);
         setPhase('public-view');
       } else {
-        // User arrived via shared link but doesn't have the briefing in localStorage
-        // This means they're an external viewer (prospect)
+        // Not in localStorage - fetch from Google Sheets (external viewer)
         setIsExternalViewer(true);
-        setPhase('public-view');
+        fetchBriefingFromSheets(viewId);
       }
     }
-  }, [savedBriefings]);
+  }, []); // Empty dependency - only run once on mount (fixes URL bug)
 
   useEffect(() => {
     let interval: any;
@@ -1074,13 +1092,29 @@ const App = () => {
                    >
                      <EditIcon className="w-4 h-4" /> {phase === 'editing' ? (hasUnsavedEdits ? 'Save Changes' : 'Exit Edit Mode') : 'Edit Intelligence'}
                    </button>
-                   <button 
-                    onClick={() => {
-                      const url = `${window.location.origin}${window.location.pathname}?view=${currentBriefing.id}`;
-                      navigator.clipboard.writeText(url);
-                      setCopySuccess(true);
-                      setTimeout(() => setCopySuccess(false), 2000);
-                    }} 
+                   <button
+                    onClick={async () => {
+                      try {
+                        // Save briefing to Google Sheets first
+                        const response = await fetch(BRIEFINGS_SCRIPT_URL, {
+                          method: 'POST',
+                          body: JSON.stringify({ briefing: currentBriefing }),
+                        });
+                        const result = await response.json();
+
+                        if (result.success && result.id) {
+                          const url = `${window.location.origin}${window.location.pathname}?view=${result.id}`;
+                          await navigator.clipboard.writeText(url);
+                          setCopySuccess(true);
+                          setTimeout(() => setCopySuccess(false), 2000);
+                        } else {
+                          alert('Failed to generate shareable link');
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        alert('Failed to generate shareable link');
+                      }
+                    }}
                     className="px-6 py-4 bg-white border border-slate-200 text-slate-900 text-[11px] font-black uppercase rounded-2xl tracking-widest hover:bg-slate-50 transition-all flex items-center gap-2 shadow-sm"
                    >
                      <LinkIcon className="w-4 h-4" /> {copySuccess ? 'Copied!' : 'Copy Link'}
