@@ -117,12 +117,45 @@ export async function generateBriefingContent(
       `;
     }
 
+    const blufInstructions = `
+      BLUF SECTION RULES (CRITICAL - This is decision-support intelligence, not a summary):
+
+      BOTTOM LINE UP FRONT (bluf.intro):
+      - Write 1-2 sentences explaining the core strategic shift happening
+      - Focus on direction of change, policy momentum, regulatory risk, or economic leverage
+      - Must answer: "What's changing and why should leadership care?"
+      - Do NOT just describe the topic - explain what's SHIFTING
+
+      PULSE OBSERVATIONS (bluf.bullets):
+      - Provide at least 3 bullets describing patterns or trajectories, NOT single bills
+      - Each bullet MUST follow this formula: [Policy/Market Shift] → [Likely Consequence] → [Why This Matters]
+      - Make them: forward-looking, cross-state when possible, about power/money/regulation/public pressure
+      - AVOID: generic "monitor this" language, single-state trivia (unless signaling a bigger wave)
+      - A Head of Government Affairs must find each bullet actionable
+
+      STRATEGIC ACTIONS (bluf.actions):
+      - Provide exactly 3 numbered actions
+      - Each action must be: Specific + Proactive + Tied to a Policy Risk or Opportunity
+      - Each must answer: What should the company do? What risk/opportunity does this address? Why act before policy is finalized?
+      - AVOID: vague actions like "stay informed", "consider evaluating", or "continue monitoring"
+      - Each action should clearly connect to one of the pulse observations
+
+      QUALITY FILTER (Apply before finalizing):
+      - Would a Head of Government Affairs find this actionable?
+      - Does each bullet describe a trend, not a news event?
+      - Does each action clearly connect to a pulse observation?
+      - If not, rewrite.
+    `;
+
     const prompt = `
       ${systemPrompt || ''}
 
+      You are a state policy intelligence analyst preparing a decision-support brief for a Fortune 500 government affairs team.
       Generate a professional high-level intelligence briefing for the ${topic} industry.
-      Target Audience: State-level government relations leaders.
+      Target Audience: State-level government relations leaders and corporate strategy teams.
       Focus Context: ${context || 'General industry monitoring.'}
+
+      ${blufInstructions}
 
       ${insightContext}
 
