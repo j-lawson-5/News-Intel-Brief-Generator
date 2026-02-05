@@ -692,7 +692,7 @@ const App = () => {
   const [gatedBriefingId, setGatedBriefingId] = useState<string | null>(null);
   const [gatedFormData, setGatedFormData] = useState({ firstName: '', lastName: '', email: '' });
   const [gatedFormError, setGatedFormError] = useState<string | null>(null);
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isGeneratingLink, setIsGeneratingLink] = useState<'public' | 'gated' | null>(null);
   const [isSubmittingGatedForm, setIsSubmittingGatedForm] = useState(false);
 
   const [isTuning, setIsTuning] = useState<string | null>(null);
@@ -1240,9 +1240,9 @@ const App = () => {
                      {showLinkDropdown && (
                        <div className="absolute top-full left-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden min-w-[200px]">
                          <button
-                           disabled={isGeneratingLink}
+                           disabled={!!isGeneratingLink}
                            onClick={async () => {
-                             setIsGeneratingLink(true);
+                             setIsGeneratingLink('public');
                              try {
                                const response = await fetch(BRIEFINGS_SCRIPT_URL, {
                                  method: 'POST',
@@ -1262,18 +1262,18 @@ const App = () => {
                                console.error(err);
                                alert('Failed to generate link');
                              } finally {
-                               setIsGeneratingLink(false);
+                               setIsGeneratingLink(null);
                              }
                            }}
                            className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all border-b border-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
                          >
-                           {isGeneratingLink ? '⏳ Generating...' : '🔓 Public Link'}
-                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink ? 'Please wait' : 'Anyone can view directly'}</span>
+                           {isGeneratingLink === 'public' ? '⏳ Generating...' : '🔓 Public Link'}
+                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'public' ? 'Please wait' : 'Anyone can view directly'}</span>
                          </button>
                          <button
-                           disabled={isGeneratingLink}
+                           disabled={!!isGeneratingLink}
                            onClick={async () => {
-                             setIsGeneratingLink(true);
+                             setIsGeneratingLink('gated');
                              try {
                                const response = await fetch(BRIEFINGS_SCRIPT_URL, {
                                  method: 'POST',
@@ -1293,13 +1293,13 @@ const App = () => {
                                console.error(err);
                                alert('Failed to generate link');
                              } finally {
-                               setIsGeneratingLink(false);
+                               setIsGeneratingLink(null);
                              }
                            }}
                            className="w-full px-4 py-3 text-left text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                          >
-                           {isGeneratingLink ? '⏳ Generating...' : '🔒 Gated Link'}
-                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink ? 'Please wait' : 'Requires name & email first'}</span>
+                           {isGeneratingLink === 'gated' ? '⏳ Generating...' : '🔒 Gated Link'}
+                           <span className="block text-[9px] font-medium text-slate-400 normal-case tracking-normal mt-0.5">{isGeneratingLink === 'gated' ? 'Please wait' : 'Requires name & email first'}</span>
                          </button>
                        </div>
                      )}
