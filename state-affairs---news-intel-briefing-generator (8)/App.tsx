@@ -173,6 +173,71 @@ const renderTextWithFootnotes = (text: string, sources: { title: string; url: st
   });
 };
 
+// --- Sub-components moved to top level for render stability ---
+
+interface EditableTextProps {
+  value: string;
+  onSave: (v: string) => void;
+  isEditable?: boolean;
+  sources: { title: string; url: string }[];
+  className?: string;
+  isTextArea?: boolean;
+}
+
+const EditableText = ({ value, onSave, isEditable, sources, className = "", isTextArea = false }: EditableTextProps) => {
+  if (!isEditable) return <span className={className}>{renderTextWithFootnotes(value, sources)}</span>;
+  return isTextArea ? (
+    <textarea 
+      value={value} 
+      onChange={e => onSave(e.target.value)} 
+      className={`w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none p-1 transition-colors min-h-[60px] resize-y ${className}`}
+    />
+  ) : (
+    <input 
+      value={value} 
+      onChange={e => onSave(e.target.value)} 
+      className={`w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none p-1 transition-colors ${className}`}
+    />
+  );
+};
+
+interface SectionHeaderProps {
+  num?: string;
+  title: string;
+  id: string;
+  canRemove?: boolean;
+  onRemove?: () => void;
+  onEditSection?: (section: string) => void;
+  isEditable?: boolean;
+}
+
+const SectionHeader = ({ num, title, id, canRemove = false, onRemove, onEditSection, isEditable }: SectionHeaderProps) => (
+  <div className="flex items-center justify-between group">
+    <div className="flex items-center gap-4">
+      {num && <span className="bg-slate-950 text-white text-[9px] font-black px-4 py-1.5 rounded-lg">{num}</span>}
+      <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-950 antialiased">{title}</h2>
+    </div>
+    <div className="flex gap-2">
+      {onEditSection && (
+        <button 
+          onClick={() => onEditSection(id)}
+          className="p-2 text-indigo-600 bg-indigo-50/50 hover:bg-indigo-100 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-sm ring-1 ring-indigo-100"
+        >
+          <SparkleIcon className="w-3 h-3" /> AI Tune
+        </button>
+      )}
+      {isEditable && canRemove && (
+        <button 
+          onClick={onRemove}
+          className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-sm ring-1 ring-red-100"
+        >
+          <TrashIcon className="w-3 h-3" /> Delete Section
+        </button>
+      )}
+    </div>
+  </div>
+);
+
 interface BriefingContentPreviewProps {
   content: BriefingContent;
   industry: string;
@@ -196,50 +261,6 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
     }
     current[parts[parts.length - 1]] = value;
     onUpdateContent(newContent);
-  };
-
-  const SectionHeader = ({ num, title, id, canRemove = false, onRemove }: { num?: string, title: string, id: string, canRemove?: boolean, onRemove?: () => void }) => (
-    <div className="flex items-center justify-between group">
-      <div className="flex items-center gap-4">
-        {num && <span className="bg-slate-950 text-white text-[9px] font-black px-4 py-1.5 rounded-lg">{num}</span>}
-        <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-950 antialiased">{title}</h2>
-      </div>
-      <div className="flex gap-2">
-        {onEditSection && (
-          <button 
-            onClick={() => onEditSection(id)}
-            className="p-2 text-indigo-600 bg-indigo-50/50 hover:bg-indigo-100 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-sm ring-1 ring-indigo-100"
-          >
-            <SparkleIcon className="w-3 h-3" /> AI Tune
-          </button>
-        )}
-        {isEditable && canRemove && (
-          <button 
-            onClick={onRemove}
-            className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-all flex items-center gap-2 text-[10px] font-black uppercase tracking-widest shadow-sm ring-1 ring-red-100"
-          >
-            <TrashIcon className="w-3 h-3" /> Delete Section
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  const EditableText = ({ value, onSave, className = "", isTextArea = false }: { value: string, onSave: (v: string) => void, className?: string, isTextArea?: boolean }) => {
-    if (!isEditable) return <span className={className}>{renderTextWithFootnotes(value, content.sources)}</span>;
-    return isTextArea ? (
-      <textarea 
-        value={value} 
-        onChange={e => onSave(e.target.value)} 
-        className={`w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none p-1 transition-colors min-h-[60px] resize-y ${className}`}
-      />
-    ) : (
-      <input 
-        value={value} 
-        onChange={e => onSave(e.target.value)} 
-        className={`w-full bg-transparent border-b border-indigo-200 focus:border-indigo-600 outline-none p-1 transition-colors ${className}`}
-      />
-    );
   };
 
   return (
@@ -285,11 +306,15 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
             <EditableText 
               value={content.strategicInsight.title} 
               onSave={v => updateField('strategicInsight.title', v)} 
+              isEditable={isEditable}
+              sources={content.sources}
               className="text-xl font-black uppercase tracking-tight text-slate-900 antialiased underline decoration-indigo-100 decoration-4 underline-offset-4 block"
             />
             <EditableText 
               value={content.strategicInsight.insight} 
               onSave={v => updateField('strategicInsight.insight', v)} 
+              isEditable={isEditable}
+              sources={content.sources}
               isTextArea 
               className="text-lg font-medium leading-relaxed opacity-90 border-l-2 border-slate-100 pl-6 py-1 antialiased italic text-slate-700 block"
             />
@@ -299,11 +324,13 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
 
       {/* BLUF Section */}
       <section className="pdf-section space-y-8">
-        <SectionHeader num="01" title="Bottom Line Up Front" id="bluf" />
+        <SectionHeader num="01" title="Bottom Line Up Front" id="bluf" onEditSection={onEditSection} isEditable={isEditable} />
         <div className="border-l-[8px] border-indigo-600 pl-8 py-2">
            <EditableText 
               value={content.bluf.intro} 
               onSave={v => updateField('bluf.intro', v)} 
+              isEditable={isEditable}
+              sources={content.sources}
               isTextArea 
               className="text-2xl font-medium text-slate-800 italic leading-snug tracking-tight antialiased block"
            />
@@ -322,7 +349,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                           const newList = [...content.bluf.bullets];
                           newList[i] = v;
                           updateField('bluf.bullets', newList);
-                        }} isTextArea />
+                        }} isEditable={isEditable} sources={content.sources} isTextArea />
                       </div>
                       {isEditable && (
                         <button onClick={() => {
@@ -354,7 +381,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                           const newList = [...content.bluf.actions];
                           newList[i] = v;
                           updateField('bluf.actions', newList);
-                        }} className="text-base font-black text-indigo-900 leading-tight block" />
+                        }} isEditable={isEditable} sources={content.sources} className="text-base font-black text-indigo-900 leading-tight block" />
                       </div>
                       {isEditable && (
                         <button onClick={() => {
@@ -379,10 +406,12 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
       {/* Market Catalyst */}
       {content.forcingFunction && (
         <section className="pdf-section bg-slate-50 text-slate-950 p-10 rounded-3xl space-y-8 relative overflow-hidden border border-slate-100">
-          <SectionHeader num="02" title="Market Catalyst" id="forcingFunction" canRemove onRemove={() => updateField('forcingFunction', undefined)} />
+          <SectionHeader num="02" title="Market Catalyst" id="forcingFunction" canRemove onRemove={() => updateField('forcingFunction', undefined)} onEditSection={onEditSection} isEditable={isEditable} />
           <EditableText 
             value={content.forcingFunction.what} 
             onSave={v => updateField('forcingFunction.what', v)} 
+            isEditable={isEditable}
+            sources={content.sources}
             className="text-3xl font-black text-slate-900 leading-tight tracking-tighter antialiased underline decoration-amber-500/30 underline-offset-[8px] decoration-4 block"
           />
           <div className="pdf-grid-2 pt-4">
@@ -397,7 +426,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                             const newList = [...content.forcingFunction!.forecast];
                             newList[i] = v;
                             updateField('forcingFunction.forecast', newList);
-                          }} />
+                          }} isEditable={isEditable} sources={content.sources} />
                         </div>
                         {isEditable && (
                           <button onClick={() => {
@@ -419,7 +448,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
              <div className="pdf-grid-item-2 space-y-6">
                 <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300 antialiased">Intelligence Synthesis</h4>
                 <div className="text-base text-slate-500 italic leading-relaxed pl-6 border-l-2 border-slate-200 antialiased">
-                   <EditableText value={content.forcingFunction.why} onSave={v => updateField('forcingFunction.why', v)} isTextArea />
+                   <EditableText value={content.forcingFunction.why} onSave={v => updateField('forcingFunction.why', v)} isEditable={isEditable} sources={content.sources} isTextArea />
                 </div>
              </div>
           </div>
@@ -429,7 +458,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
       {/* Regional Impact */}
       {content.regional && (
         <section className="pdf-section space-y-8">
-          <SectionHeader num="03" title="Regional Impact Analysis" id="regional" />
+          <SectionHeader num="03" title="Regional Impact Analysis" id="regional" onEditSection={onEditSection} isEditable={isEditable} />
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {content.regional.map((r, i) => (
               <div key={i} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-3 relative group overflow-hidden">
@@ -438,18 +467,18 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                     const newList = [...content.regional];
                     newList[i].state = v;
                     updateField('regional', newList);
-                  }} className="text-[10px] font-black uppercase tracking-widest text-indigo-600" />
+                  }} isEditable={isEditable} sources={content.sources} className="text-[10px] font-black uppercase tracking-widest text-indigo-600" />
                   <EditableText value={r.status} onSave={v => {
                     const newList = [...content.regional];
                     newList[i].status = v;
                     updateField('regional', newList);
-                  }} className="text-[9px] font-black uppercase text-slate-400 text-right whitespace-nowrap" />
+                  }} isEditable={isEditable} sources={content.sources} className="text-[9px] font-black uppercase text-slate-400 text-right whitespace-nowrap" />
                 </div>
                 <EditableText value={r.impact} onSave={v => {
                   const newList = [...content.regional];
                   newList[i].impact = v;
                   updateField('regional', newList);
-                }} isTextArea className="text-sm font-bold text-slate-800 leading-snug block" />
+                }} isEditable={isEditable} sources={content.sources} isTextArea className="text-sm font-bold text-slate-800 leading-snug block" />
                 {isEditable && (
                   <button onClick={() => {
                     const newList = content.regional.filter((_, idx) => idx !== i);
@@ -472,7 +501,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
       {/* Strategic Signals */}
       {content.signals && (
         <section className="pdf-section space-y-8">
-          <SectionHeader num="04" title="Strategic Signals" id="signals" />
+          <SectionHeader num="04" title="Strategic Signals" id="signals" onEditSection={onEditSection} isEditable={isEditable} />
           <div className="space-y-12">
             {content.signals.map((s, i) => (
               <div key={i} className="space-y-4 border-l-4 border-slate-100 pl-8 pb-4 relative group">
@@ -488,12 +517,12 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                   const newList = [...content.signals];
                   newList[i].title = v;
                   updateField('signals', newList);
-                }} className="text-xl font-black text-slate-950 uppercase tracking-tight block" />
+                }} isEditable={isEditable} sources={content.sources} className="text-xl font-black text-slate-950 uppercase tracking-tight block" />
                 <EditableText value={s.activity} onSave={v => {
                   const newList = [...content.signals];
                   newList[i].activity = v;
                   updateField('signals', newList);
-                }} isTextArea className="text-base font-medium text-slate-600 italic leading-relaxed block" />
+                }} isEditable={isEditable} sources={content.sources} isTextArea className="text-base font-medium text-slate-600 italic leading-relaxed block" />
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 pt-2">
                   {s.developments.map((d, j) => (
                     <li key={j} className="flex gap-4 text-sm font-bold text-slate-700 leading-tight group/item">
@@ -503,7 +532,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                           const newList = [...content.signals];
                           newList[i].developments[j] = v;
                           updateField('signals', newList);
-                        }} />
+                        }} isEditable={isEditable} sources={content.sources} />
                       </div>
                       {isEditable && (
                         <button onClick={() => {
@@ -540,7 +569,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
       {/* Watch List */}
       {content.watchList && (
         <section className="pdf-section space-y-8">
-          <SectionHeader num="05" title="The Watch List" id="watchList" />
+          <SectionHeader num="05" title="The Watch List" id="watchList" onEditSection={onEditSection} isEditable={isEditable} />
           <div className="flex flex-wrap gap-4">
             {content.watchList.map((w, i) => (
               <div key={i} className="relative group">
@@ -549,7 +578,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                     const newList = [...content.watchList];
                     newList[i] = v;
                     updateField('watchList', newList);
-                  }} />
+                  }} isEditable={isEditable} sources={content.sources} />
                 </span>
                 {isEditable && (
                   <button onClick={() => {
@@ -582,13 +611,13 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
                   const newList = [...content.sources];
                   newList[i].title = v;
                   updateField('sources', newList);
-                }} className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors truncate block" />
+                }} isEditable={isEditable} sources={content.sources} className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors truncate block" />
                 {isEditable && (
                   <EditableText value={src.url} onSave={v => {
                     const newList = [...content.sources];
                     newList[i].url = v;
                     updateField('sources', newList);
-                  }} className="text-[8px] text-slate-300 block truncate" />
+                  }} isEditable={isEditable} sources={content.sources} className="text-[8px] text-slate-300 block truncate" />
                 )}
               </div>
               {isEditable && (
@@ -747,22 +776,42 @@ const App = () => {
     if (!topic) return;
     setPhase('generating');
     try {
-      const params = new URLSearchParams({ days: dateRange.toString() });
-      const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-      const result = await response.json();
-      const rawArticles = Array.isArray(result.data) ? result.data : [];
-      const relevantArticles = rawArticles.filter((a: Article) => {
+      // 1. Filter articles from the already cached pool first to check for availability
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - dateRange);
+      
+      let relevantArticles = cachedArticles.filter((a: Article) => {
+        const articleDate = new Date(a.date);
+        const isRecent = articleDate >= cutoff;
         const articleTopic = a.category?.trim() || detectIndustry(a.topic || a.summary || a.title || '');
-        return articleTopic.toLowerCase() === topic.toLowerCase();
+        return isRecent && articleTopic.toLowerCase() === topic.toLowerCase();
       });
+
+      // 2. If cache is insufficient, attempt a fresh fetch for the specific range
       if (relevantArticles.length === 0) {
+        const params = new URLSearchParams({ days: dateRange.toString() });
+        const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
+        if (!response.ok) throw new Error("Database link failed.");
+        const result = await response.json();
+        const rawArticles = Array.isArray(result.data) ? result.data : [];
+        relevantArticles = rawArticles.filter((a: Article) => {
+          const articleTopic = a.category?.trim() || detectIndustry(a.topic || a.summary || a.title || '');
+          return articleTopic.toLowerCase() === topic.toLowerCase();
+        });
+      }
+
+      if (relevantArticles.length === 0) {
+        alert(`No articles found for the "${topic}" sector within the last ${dateRange} days. Try increasing the temporal look-back range or ensuring the article vault is synchronized in the Data Console.`);
         setPhase('input');
         return;
       }
       
-      // Limit articles to prevent exceeding model output limits/context
+      // 3. Limit articles to stay within model reasoning/token limits
       const limitedArticles = relevantArticles.slice(0, 40);
       const content = await generateBriefingContent(topic, context, limitedArticles, prospectName, prospectDomain, systemPrompt);
+      
+      if (!content) throw new Error("AI engine returned empty synthesis.");
+
       const newBriefing: Briefing = {
         id: `brf_${Date.now()}`,
         topic,
@@ -772,6 +821,7 @@ const App = () => {
         versions: [{ num: 1, createdAt: new Date().toISOString(), createdBy: 'AI Synthesis', content }],
         currentVersion: 1
       };
+
       setCurrentBriefing(newBriefing);
       setSavedBriefings(prev => {
         const updatedVault = [newBriefing, ...prev].slice(0, 40);
@@ -780,6 +830,8 @@ const App = () => {
       });
       setPhase('preview');
     } catch (err) {
+      console.error('[Architect Hub] Critical synthesis error:', err);
+      alert(`Synthesis failed: ${err instanceof Error ? err.message : 'Unknown Protocol Error'}. Please verify your network and check the Data Console.`);
       setPhase('input');
     }
   };
@@ -845,6 +897,7 @@ const App = () => {
       setTuningPrompt("");
     } catch (err) {
       console.error('Tuning failure');
+      alert("AI tuning failed. Please try rephrasing your instructions.");
     } finally {
       setIsProcessingTune(false);
     }
