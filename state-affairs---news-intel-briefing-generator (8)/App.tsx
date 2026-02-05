@@ -73,6 +73,22 @@ const EditIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   </svg>
 );
 
+const SaveIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+    <polyline points="17 21 17 13 7 13 7 21" />
+    <polyline points="7 3 7 8 15 8" />
+  </svg>
+);
+
+const ExitIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
 const EyeIcon = ({ className = "w-5 h-5" }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
@@ -1134,9 +1150,20 @@ const App = () => {
                   setHasUnsavedEdits(false);
                 }
               }}
-              className={`px-4 py-2 border text-[10px] font-black uppercase rounded-xl tracking-widest transition-all flex items-center gap-2 ${phase === 'editing' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'}`}
+              className={`px-4 py-2 border text-[10px] font-black uppercase rounded-xl tracking-widest transition-all flex items-center gap-2 ${
+                phase === 'editing'
+                  ? hasUnsavedEdits
+                    ? 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                    : 'bg-slate-500 text-white border-slate-500 hover:bg-slate-600'
+                  : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'
+              }`}
             >
-              <EditIcon className="w-3.5 h-3.5" /> {phase === 'editing' ? (hasUnsavedEdits ? 'Save' : 'Exit Edit') : 'Edit'}
+              {phase === 'editing'
+                ? hasUnsavedEdits
+                  ? <><SaveIcon className="w-3.5 h-3.5" /> Save</>
+                  : <><ExitIcon className="w-3.5 h-3.5" /> Exit</>
+                : <><EditIcon className="w-3.5 h-3.5" /> Edit</>
+              }
             </button>
             <div className="relative">
               <button
