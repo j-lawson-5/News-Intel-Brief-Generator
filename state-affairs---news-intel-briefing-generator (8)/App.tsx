@@ -434,21 +434,21 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
 
       {/* Market Catalyst */}
       {content.forcingFunction && (
-        <section className="pdf-section bg-slate-50 text-slate-950 p-10 rounded-3xl space-y-8 relative overflow-hidden border border-slate-100">
+        <section className="pdf-section bg-slate-50 text-slate-950 p-6 sm:p-10 rounded-3xl space-y-6 sm:space-y-8 relative overflow-hidden border border-slate-100">
           <SectionHeader num="02" title="Market Catalyst" id="forcingFunction" canRemove onRemove={() => updateField('forcingFunction', undefined)} onEditSection={onEditSection} isEditable={isEditable} />
-          <EditableText 
-            value={content.forcingFunction.what} 
-            onSave={v => updateField('forcingFunction.what', v)} 
+          <EditableText
+            value={content.forcingFunction.what}
+            onSave={v => updateField('forcingFunction.what', v)}
             isEditable={isEditable}
             sources={content.sources}
-            className="text-3xl font-black text-slate-900 leading-tight tracking-tighter antialiased underline decoration-amber-500/30 underline-offset-[8px] decoration-4 block"
+            className="text-xl sm:text-3xl font-black text-slate-900 leading-tight tracking-tighter antialiased underline decoration-amber-500/30 underline-offset-[8px] decoration-4 block"
           />
           <div className="pdf-grid-2 pt-4">
              <div className="pdf-grid-item-2 space-y-6">
                 <h4 className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300 antialiased">Forecast Spectrum</h4>
                 <div className="space-y-4">
                    {content.forcingFunction.forecast.map((f, i) => (
-                     <div key={i} className="flex gap-4 text-lg font-black text-slate-700 antialiased tracking-tighter group">
+                     <div key={i} className="flex gap-3 sm:gap-4 text-base sm:text-lg font-black text-slate-700 antialiased tracking-tighter group">
                         <span className="text-amber-500">→</span>
                         <div className="flex-1">
                           <EditableText value={f} onSave={v => {
@@ -1177,13 +1177,13 @@ const App = () => {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         {!isExternalViewer && (
-          <div className="bg-slate-900 text-white px-8 py-3 flex justify-between items-center no-print">
+          <div className="bg-slate-900 text-white px-4 sm:px-8 py-3 flex justify-between items-center no-print">
             <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Live Public View Preview</span>
             <button onClick={() => setPhase('preview')} className="text-[10px] font-black uppercase tracking-widest bg-white/10 px-4 py-2 rounded-lg hover:bg-white/20 transition-all">Back to Platform</button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto py-12 px-6 bg-slate-50 flex flex-col items-center">
-          <div className="max-w-4xl w-full border border-slate-100 shadow-2xl rounded-[48px] p-12 md:p-20 bg-white mt-12 overflow-hidden">
+        <div className="flex-1 overflow-y-auto py-6 sm:py-12 px-3 sm:px-6 bg-slate-50 flex flex-col items-center">
+          <div className="max-w-4xl w-full border border-slate-100 shadow-2xl rounded-3xl sm:rounded-[48px] p-6 sm:p-12 md:p-20 bg-white mt-4 sm:mt-12 overflow-hidden">
             {currentViewContent && <BriefingContentPreview content={currentViewContent} industry={currentBriefing.topic} dateRange={currentBriefing.dateRange} />}
             <BriefingFooter />
           </div>
