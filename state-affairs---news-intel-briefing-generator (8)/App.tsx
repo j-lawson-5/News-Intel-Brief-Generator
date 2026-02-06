@@ -403,8 +403,8 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
               </h3>
               <div className="space-y-4">
                  {content.bluf.actions.map((a, i) => (
-                   <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-2xl flex items-center gap-4 shadow-sm group">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-md">{i+1}</div>
+                   <div key={i} className="bg-slate-50 border border-slate-100 p-6 rounded-2xl flex items-start gap-4 shadow-sm group">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-[11px] font-black shrink-0 shadow-md mt-0.5">{i+1}</div>
                       <div className="flex-1">
                         <EditableText value={a} onSave={v => {
                           const newList = [...content.bluf.actions];
@@ -488,7 +488,7 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
       {content.regional && (
         <section className="pdf-section space-y-8">
           <SectionHeader num="03" title="Regional Impact Analysis" id="regional" onEditSection={onEditSection} isEditable={isEditable} />
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {content.regional.map((r, i) => (
               <div key={i} className="p-6 bg-white border border-slate-100 rounded-2xl shadow-sm space-y-3 relative group overflow-hidden">
                 <div className="flex flex-wrap justify-between items-start gap-2">
@@ -741,9 +741,20 @@ const App = () => {
   // Fetch briefing from Google Sheets (for shared links)
   const fetchBriefingFromSheets = async (id: string, isGated: boolean = false) => {
     setIsLoadingSharedBriefing(true);
+    const minDisplayTime = 2500; // Show confetti for at least 2.5 seconds
+    const startTime = Date.now();
+
     try {
       const response = await fetch(`${BRIEFINGS_SCRIPT_URL}?briefingId=${id}`);
       const result = await response.json();
+
+      // Calculate remaining time to meet minimum display
+      const elapsed = Date.now() - startTime;
+      const remainingTime = Math.max(0, minDisplayTime - elapsed);
+
+      // Wait for remaining time before showing content
+      await new Promise(resolve => setTimeout(resolve, remainingTime));
+
       if (result.success && result.briefing) {
         if (isGated) {
           // Show form first, store briefing ID for after form submission
@@ -1025,11 +1036,56 @@ const App = () => {
   // Loading screen for shared briefings
   if (isLoadingSharedBriefing) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-sm font-black uppercase tracking-widest text-slate-400">Loading Intelligence Briefing...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center overflow-hidden relative">
+        {/* CSS Confetti */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 rounded-full animate-confetti"
+              style={{
+                left: `${Math.random() * 100}%`,
+                backgroundColor: ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6'][i % 6],
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
         </div>
+
+        {/* Branded Content */}
+        <div className="text-center relative z-10">
+          {/* Logo Mark */}
+          <div className="mb-8">
+            <div className="w-20 h-20 mx-auto bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 border border-white/20">
+              <svg className="w-10 h-10 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-black uppercase tracking-tight text-white mb-2">State Affairs</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-indigo-300">State Policy Intelligence</p>
+          </div>
+
+          {/* Loading Animation */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+
+          <p className="text-sm font-medium text-slate-400">Preparing your intelligence briefing...</p>
+        </div>
+
+        {/* Confetti Keyframes - injected via style tag */}
+        <style>{`
+          @keyframes confetti {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+          }
+          .animate-confetti {
+            animation: confetti linear infinite;
+          }
+        `}</style>
       </div>
     );
   }
@@ -1153,6 +1209,22 @@ const App = () => {
 
         {(phase === 'preview' || phase === 'editing') && currentBriefing ? (
           <div className="flex items-center gap-3">
+            {/* Discard button - only shows when editing with unsaved changes */}
+            {phase === 'editing' && hasUnsavedEdits && (
+              <button
+                onClick={() => {
+                  if (confirm('Discard all changes?')) {
+                    setDraftContent(getCurrentContent());
+                    setHasUnsavedEdits(false);
+                    setPhase('preview');
+                  }
+                }}
+                className="px-4 py-2 border text-[10px] font-black uppercase rounded-xl tracking-widest transition-all flex items-center gap-2 bg-white border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                Discard
+              </button>
+            )}
             <button
               onClick={() => {
                 if (phase === 'editing') {

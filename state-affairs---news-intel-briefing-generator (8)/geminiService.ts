@@ -102,18 +102,73 @@ export async function generateBriefingContent(
     }).join('\n');
 
     let insightContext = `
-      STRATEGIC INSIGHT INSTRUCTIONS:
-      Focus on a "Sector-Level Outlook" for ${topic}. 
-      Use the provided 'Category' labels in the data to identify which sub-sectors are most volatile.
-      The 'title' should be: "Sector Strategic Outlook: ${topic}". 
+      STRATEGIC INSIGHT RULES (CRITICAL - This must be specific and actionable):
+
+      Focus on a "Sector-Level Outlook" for ${topic}.
+      The 'title' should be: "Sector Strategic Outlook: ${topic}".
+
+      'insight' MUST contain ALL of the following:
+
+      1. EXPOSURE MAPPING (First 1-2 sentences):
+         - Identify which specific policy categories from the data create the most exposure
+         - Name the categories explicitly (e.g., "Regulatory compliance", "Tax treatment", "Permitting")
+         - State whether exposure is growing, stable, or shifting
+
+      2. COMPETITIVE POSITIONING (Next 1-2 sentences):
+         - How does the current policy trajectory advantage or disadvantage different players?
+         - Who gains leverage? Who faces margin pressure? Who must adapt fastest?
+         - Be specific about market position implications
+
+      3. STRATEGIC WINDOW (Final 1-2 sentences):
+         - What is the timeline for action? (e.g., "Before Q3 rulemaking", "Ahead of legislative session")
+         - What capability or relationship should be built NOW?
+         - What's the cost of waiting vs. acting early?
+
+      QUALITY CHECK:
+      - Does this read like a McKinsey partner briefing a C-suite, NOT a news summary?
+      - Are there specific categories, timelines, and competitive dynamics named?
+      - Would a Government Affairs VP forward this to their CEO? If not, rewrite.
+
+      AVOID: Generic statements like "companies should monitor developments" or "policy changes may impact operations"
     `;
 
     if (prospectName) {
       insightContext = `
-      PROSPECT PERSONALIZATION:
-      The briefing is for: ${prospectName} (${prospectDomain || 'N/A'}).
+      STRATEGIC INSIGHT RULES - PROSPECT PERSONALIZATION (CRITICAL - This must be company-specific and actionable):
+
+      This briefing is for: ${prospectName} (${prospectDomain || 'N/A'}).
       The 'title' MUST be: "Strategic Impact: ${prospectName}".
-      Explain how policy shifts in specific categories (e.g. Regulatory, Tax) impact this company.
+
+      'insight' MUST contain ALL of the following, SPECIFIC to ${prospectName}:
+
+      1. DIRECT EXPOSURE (First 1-2 sentences):
+         - Which specific policy categories from the data directly affect ${prospectName}'s operations?
+         - Name the categories explicitly (e.g., "Regulatory compliance costs", "Permitting delays", "Tax treatment changes")
+         - Quantify exposure direction: Is it increasing, decreasing, or shifting?
+         - Example: "${prospectName}'s exposure to [category] is intensifying as [X] states advance [type of policy]."
+
+      2. COMPETITIVE IMPACT (Next 1-2 sentences):
+         - How does the policy trajectory affect ${prospectName} relative to competitors?
+         - Does this create first-mover advantage, compliance burden, or market access risk?
+         - Be specific: Who gains? Who loses? Where does ${prospectName} sit?
+         - Example: "While [competitor type] faces [burden], ${prospectName}'s [characteristic] positions it to [advantage/disadvantage]."
+
+      3. ACTION WINDOW (Final 1-2 sentences):
+         - What specific action should ${prospectName} take and by when?
+         - What relationship, capability, or positioning should be built NOW?
+         - What's the cost of waiting vs. acting before policy finalizes?
+         - Example: "${prospectName} should [specific action] before [deadline/event] to [specific outcome]."
+
+      QUALITY CHECK - Ask yourself before finalizing:
+      - Is ${prospectName} named at least twice in the insight?
+      - Are there specific policy categories tied to specific business impacts?
+      - Is there a clear timeline or trigger event mentioned?
+      - Would ${prospectName}'s Head of Government Affairs forward this to their CEO? If not, rewrite.
+
+      STRICT PROHIBITION:
+      - Do NOT write generic statements that could apply to any company
+      - Do NOT use phrases like "companies in this space", "organizations should monitor", or "stakeholders may be affected"
+      - Every sentence must be about ${prospectName} specifically
       `;
     }
 
