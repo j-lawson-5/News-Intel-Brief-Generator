@@ -636,17 +636,28 @@ const BriefingContentPreview = ({ content, industry, dateRange, isEditable, onEd
             <div key={i} id={`source-${i+1}`} className="flex gap-4 scroll-mt-24 group">
               <span className="text-[10px] font-black text-indigo-200 mt-0.5">{String(i+1).padStart(2, '0')}</span>
               <div className="flex-1 overflow-hidden">
-                <EditableText value={src.title} onSave={v => {
-                  const newList = [...content.sources];
-                  newList[i].title = v;
-                  updateField('sources', newList);
-                }} isEditable={isEditable} sources={content.sources} className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors truncate block" />
-                {isEditable && (
-                  <EditableText value={src.url} onSave={v => {
-                    const newList = [...content.sources];
-                    newList[i].url = v;
-                    updateField('sources', newList);
-                  }} isEditable={isEditable} sources={content.sources} className="text-[8px] text-slate-300 block truncate" />
+                {isEditable ? (
+                  <>
+                    <EditableText value={src.title} onSave={v => {
+                      const newList = [...content.sources];
+                      newList[i].title = v;
+                      updateField('sources', newList);
+                    }} isEditable={isEditable} sources={content.sources} className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors truncate block" />
+                    <EditableText value={src.url} onSave={v => {
+                      const newList = [...content.sources];
+                      newList[i].url = v;
+                      updateField('sources', newList);
+                    }} isEditable={isEditable} sources={content.sources} className="text-[8px] text-slate-300 block truncate" />
+                  </>
+                ) : (
+                  <a
+                    href={src.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] font-bold text-slate-500 hover:text-indigo-600 transition-colors truncate block"
+                  >
+                    {src.title}
+                  </a>
                 )}
               </div>
               {isEditable && (
