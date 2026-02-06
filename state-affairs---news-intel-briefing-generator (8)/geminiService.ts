@@ -154,21 +154,32 @@ export async function generateBriefingContent(
          - Example: "While [competitor type] faces [burden], ${prospectName}'s [characteristic] positions it to [advantage/disadvantage]."
 
       3. ACTION WINDOW (Final 1-2 sentences):
-         - What specific action should ${prospectName} take and by when?
-         - What relationship, capability, or positioning should be built NOW?
-         - What's the cost of waiting vs. acting before policy finalizes?
-         - Example: "${prospectName} should [specific action] before [deadline/event] to [specific outcome]."
+         - Name a SPECIFIC bill number, regulatory body, or legislative session to track
+         - Name a SPECIFIC state or coalition of states where action is needed
+         - Give a SPECIFIC deadline (e.g., "before the March 15 committee vote", "ahead of Q2 rulemaking")
+         - GOOD: "${prospectName} should file comments with the Ohio PUCO before the March 15 deadline on docket 24-0892"
+         - GOOD: "${prospectName} should secure meetings with PA House Commerce Committee members before HB 1234 moves to floor vote"
+         - BAD: "${prospectName} should leverage its government relations team to engage with policymakers"
+         - BAD: "${prospectName} should advocate for policies that support sustainable growth"
 
       QUALITY CHECK - Ask yourself before finalizing:
       - Is ${prospectName} named at least twice in the insight?
       - Are there specific policy categories tied to specific business impacts?
-      - Is there a clear timeline or trigger event mentioned?
+      - Is there a SPECIFIC bill number, docket, committee, or regulatory body named?
+      - Is there a SPECIFIC deadline or trigger event (not just "Q1 2027")?
       - Would ${prospectName}'s Head of Government Affairs forward this to their CEO? If not, rewrite.
 
-      STRICT PROHIBITION:
-      - Do NOT write generic statements that could apply to any company
-      - Do NOT use phrases like "companies in this space", "organizations should monitor", or "stakeholders may be affected"
-      - Every sentence must be about ${prospectName} specifically
+      STRICT PROHIBITION - These phrases are BANNED:
+      - "leverage its government relations team"
+      - "engage with policymakers"
+      - "advocate for policies that support"
+      - "proactively engage"
+      - "capitalize on the shifting regulatory landscape"
+      - "sustainable growth and responsible development"
+      - "navigate complex regulations"
+      - "ensure compliance"
+      - Any phrase that sounds like it came from a consulting deck
+      - Every sentence must contain a SPECIFIC proper noun (bill, agency, committee, state, deadline)
       `;
     }
 
