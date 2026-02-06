@@ -737,6 +737,7 @@ const App = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [expandedTopics, setExpandedTopics] = useState<Set<string>>(new Set());
+  const [articleCountDelta, setArticleCountDelta] = useState<number | null>(null);
 
   // Fetch briefing from Google Sheets (for shared links)
   const fetchBriefingFromSheets = async (id: string, isGated: boolean = false) => {
@@ -848,12 +849,15 @@ const App = () => {
 
   const fetchArticleData = async () => {
     setIsRefreshing(true);
+    const previousCount = cachedArticles.length;
     try {
       const params = new URLSearchParams({ days: '90' });
       const response = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
       const result = await response.json();
       if (result.success) {
         const data = result.data || [];
+        const delta = data.length - previousCount;
+        setArticleCountDelta(delta);
         setCachedArticles(data);
         const timestamp = new Date().toISOString();
         setLastRefreshed(timestamp);
@@ -1605,6 +1609,14 @@ const App = () => {
                 <div className="text-[9px] font-bold text-slate-400">
                   {lastRefreshed ? `Last Handshake: ${new Date(lastRefreshed).toLocaleString()}` : 'No sync history'}
                 </div>
+              </div>
+              <div className="flex items-center justify-between text-xs border-t border-slate-100 pt-4">
+                <span className="text-slate-500 font-bold">{cachedArticles.length.toLocaleString()} total records</span>
+                {articleCountDelta !== null && (
+                  <span className={`font-bold ${articleCountDelta > 0 ? 'text-emerald-600' : articleCountDelta < 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                    {articleCountDelta > 0 ? `+${articleCountDelta} new` : articleCountDelta < 0 ? `${articleCountDelta} removed` : 'No changes'}
+                  </span>
+                )}
               </div>
               <button 
                 onClick={fetchArticleData}
