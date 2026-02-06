@@ -184,33 +184,55 @@ export async function generateBriefingContent(
     }
 
     const blufInstructions = `
-      BLUF SECTION RULES (CRITICAL - This is decision-support intelligence, not a summary):
+      BLUF SECTION RULES (CRITICAL - This is decision-support intelligence for STATE government affairs teams):
+
+      AUDIENCE CONTEXT:
+      - Readers are STATE government affairs professionals, NOT federal lobbyists
+      - They need to know WHICH STATES and WHICH BILLS to prioritize
+      - Generic "state-level policy shifts" language is USELESS to them
+      - Every insight must be tied to specific states, bills, or regulatory bodies
 
       BOTTOM LINE UP FRONT (bluf.intro):
       - Write 1-2 sentences explaining the core strategic shift happening
-      - Focus on direction of change, policy momentum, regulatory risk, or economic leverage
-      - Must answer: "What's changing and why should leadership care?"
-      - Do NOT just describe the topic - explain what's SHIFTING
+      - MUST name 2-3 specific states leading the trend (e.g., "California, New York, and Illinois are advancing...")
+      - MUST cite at least one specific bill, docket, or regulatory action with [n] citation
+      - GOOD: "Pennsylvania's HB 1234 [1] and similar bills in Ohio and Michigan signal a regional push toward..."
+      - GOOD: "California's AB 567 [3] is setting a precedent that New York and Washington are likely to follow..."
+      - BAD: "Real estate firms face increasing pressure from diverse state-level policy shifts"
+      - BAD: "States are advancing various regulatory changes affecting the industry"
 
       PULSE OBSERVATIONS (bluf.bullets):
-      - Provide at least 3 bullets describing patterns or trajectories, NOT single bills
-      - Each bullet MUST follow this formula: [Policy/Market Shift] → [Likely Consequence] → [Why This Matters]
-      - Make them: forward-looking, cross-state when possible, about power/money/regulation/public pressure
-      - AVOID: generic "monitor this" language, single-state trivia (unless signaling a bigger wave)
-      - A Head of Government Affairs must find each bullet actionable
+      - Provide at least 3 bullets describing patterns or trajectories
+      - Each bullet MUST name at least one specific state
+      - Each bullet MUST include a [n] citation to source data
+      - Formula: [State(s) + Policy Action] → [Likely Consequence] → [Why This Matters]
+      - GOOD: "Pennsylvania and Ohio [2][5] are tightening tenant protections → expect 15-20% increase in compliance costs → act before Q2 implementation"
+      - BAD: "States are considering tenant protection reforms that may impact operations"
 
       STRATEGIC ACTIONS (bluf.actions):
       - Provide exactly 3 numbered actions
-      - Each action must be: Specific + Proactive + Tied to a Policy Risk or Opportunity
-      - Each must answer: What should the company do? What risk/opportunity does this address? Why act before policy is finalized?
-      - AVOID: vague actions like "stay informed", "consider evaluating", or "continue monitoring"
-      - Each action should clearly connect to one of the pulse observations
+      - Each action MUST name a specific state, bill, committee, or regulatory body
+      - Each action MUST include a timeline or trigger event
+      - GOOD: "File comments on PA HB 1234 before the March 15 Commerce Committee hearing"
+      - GOOD: "Secure meetings with Ohio Senate Finance members before SB 890 moves to floor vote in April"
+      - BAD: "Engage with state policymakers on emerging tenant protection legislation"
+      - BAD: "Monitor regulatory developments across key states"
+
+      BANNED PHRASES (These are too vague for state GR teams):
+      - "diverse state-level policy shifts"
+      - "various states are considering"
+      - "emerging regulatory landscape"
+      - "proactive engagement to mitigate risks"
+      - "capitalize on emerging opportunities"
+      - "strategic policy engagement"
+      - "maintaining a competitive edge"
+      - Any sentence without a specific state, bill, or regulatory body named
 
       QUALITY FILTER (Apply before finalizing):
-      - Would a Head of Government Affairs find this actionable?
-      - Does each bullet describe a trend, not a news event?
-      - Does each action clearly connect to a pulse observation?
-      - If not, rewrite.
+      - Does every sentence in bluf.intro name at least one state?
+      - Does every bullet have a [n] citation?
+      - Does every action name a specific bill, committee, or deadline?
+      - Would a State Government Affairs Director find this actionable? If not, rewrite.
     `;
 
     const forcingFunctionInstructions = `
